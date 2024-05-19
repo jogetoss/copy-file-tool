@@ -1,0 +1,82 @@
+[{
+    "title" : "@@org.joget.marketplace.copyfile.config@@",
+    "properties" : [
+       
+        {
+            "label" : "@@org.joget.marketplace.copyfile.setting@@",
+            "type" : "header"
+        },
+        {
+            "name":"pathOptions",
+            "label":"@@org.joget.marketplace.copyfile.pathOptions@@",
+            "type":"selectbox",
+            "required":"True",
+            "options":[
+               {
+                 "value": "",
+                 "label": ""
+               },   
+               {
+                 "value":"FILE_PATH",
+                 "label":"Enter File Path"
+               },
+               {
+                 "value":"FORM_FIELD",
+                 "label":"Form Field"
+               }
+            ]
+        },
+         
+        {
+            "name": "filePath",
+            "label": "@@org.joget.marketplace.copyfile.filePath@@",
+            "type": "textfield",
+            "required": "True",
+            "control_field":"pathOptions",
+            "control_value":"FILE_PATH",
+            "control_use_regex":"true"
+        },
+        
+        {
+            "name" : "pathFormDefId",
+            "label" : "@@org.joget.marketplace.copyfile.pathFormDefId@@",
+            "type" : "selectbox",
+            "required" : "True",
+            "options_ajax": "[CONTEXT_PATH]/web/json/console/app[APP_PATH]/forms/options",
+            "control_field":"pathOptions",
+            "control_value":"FORM_FIELD",
+            "control_use_regex":"true"    
+        },
+        {
+            "name" : "pathFileFieldId",
+            "label" : "@@org.joget.marketplace.copyfile.pathFileFieldId@@",
+            "type" : "selectbox",
+            "options_ajax_on_change" : "formDefId:pathFormDefId",
+            "options_ajax" : "[CONTEXT_PATH]/web/json/console/app[APP_PATH]/form/columns/options",
+            "required" : "True",
+            "control_field":"pathOptions",
+            "control_value":"FORM_FIELD",
+            "control_use_regex":"true"    
+        },
+        {
+            "label" : "@@org.joget.marketplace.copyfile.formToStoreFile@@",
+            "type" : "header"
+        },
+        {
+            "name" : "formDefId",
+            "label" : "@@org.joget.marketplace.copyfile.formDefId@@",
+            "type" : "selectbox",
+            "required" : "True",
+            "options_ajax": "[CONTEXT_PATH]/web/json/console/app[APP_PATH]/forms/options"
+        },
+        {
+            "name" : "fileFieldId",
+            "label" : "@@org.joget.marketplace.copyfile.fileFieldId@@",
+            "type" : "selectbox",
+            "options_ajax_on_change" : "formDefId",
+            "options_ajax" : "[CONTEXT_PATH]/web/json/console/app[APP_PATH]/form/columns/options",
+            "required" : "True"
+        }
+    ]
+}]
+
