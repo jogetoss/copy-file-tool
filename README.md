@@ -2,7 +2,7 @@
 
 **Copy File Tool** plugin allows users to copy a file from the local Joget server into a Joget form attachment.
 
-To setup and configure this plugin, please see the [documentation](https://dev.joget.org/community/display/SANDBOX2/Copy+File+Tool+Plugin).
+To setup and configure this plugin, please see the [documentation](https://dev.joget.org/community/display/marketplace/Copy+File+Tool+Plugin).
 
 ## Intent
 To facilitate integration by reading a flat file from the local file system and copying it into Joget for further processing.
