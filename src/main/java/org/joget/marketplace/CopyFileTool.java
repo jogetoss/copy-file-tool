@@ -82,25 +82,59 @@ public class CopyFileTool extends DefaultApplicationPlugin {
         // read the file
         File sourceFile = new File(filePath);
         if (sourceFile.exists()) {
-            String fileName = sourceFile.getName();
-            String tableName = appService.getFormTableName(appDef, formDefId);
-            //String id = UuidGenerator.getInstance().getUuid();
-            FileUtil.storeFile(sourceFile, tableName, outputFileRecordId);
-            FormRowSet rows = new FormRowSet();
-            FormRow row = new FormRow();
-            row.setId(outputFileRecordId);
-            row.put(fileFieldId, fileName);
-            row.put("id", outputFileRecordId);
-            rows.add(row);
+            try {
+                String fileName = sourceFile.getName();
+                String tableName = appService.getFormTableName(appDef, formDefId);
 
-            appService.storeFormData(formDefId, tableName, rows, outputFileRecordId);
+                File tempCopy = File.createTempFile("copy_", "_" + fileName);
+                java.nio.file.Files.copy(
+                        sourceFile.toPath(),
+                        tempCopy.toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                );
+                FileUtil.storeFile(tempCopy, tableName, outputFileRecordId);
 
+                FormRowSet existingRows = appService.loadFormData(
+                        appDef.getAppId(),
+                        String.valueOf(appDef.getVersion()),
+                        formDefId,
+                        outputFileRecordId
+                );
+
+                String existingFiles = "";
+                if (existingRows != null && !existingRows.isEmpty()) {
+                    existingFiles = existingRows.get(0).getProperty(fileFieldId);
+                }
+
+                String finalFiles;
+                if (existingFiles != null && !existingFiles.isEmpty()) {
+                    finalFiles = existingFiles + ";" + fileName;
+                } else {
+                    finalFiles = fileName;
+                }
+
+                FormRowSet rows = new FormRowSet();
+                FormRow row = new FormRow();
+                row.setId(outputFileRecordId);
+                row.put(fileFieldId, finalFiles);
+                row.put("id", outputFileRecordId);
+                rows.add(row);
+
+                appService.storeFormData(formDefId, tableName, rows, outputFileRecordId);
+
+            } catch (Exception e) {
+                LogUtil.error("CopyFileTool", e, "Error copying file from path");
+            }
         }
 
         return null;
     }
 
-    private void copyMultipleFiles(String filenames, String sourceTableName, String sourceFileRecordId, String formDefId, String fileFieldId, AppService appService, AppDefinition appDef, String outputFileRecordId) {
+    private void copyMultipleFiles(String filenames, String sourceTableName, String sourceFileRecordId,
+            String formDefId, String fileFieldId,
+            AppService appService, AppDefinition appDef,
+            String outputFileRecordId) {
+
         String[] files = filenames.split(";");
         StringBuilder savedFilenames = new StringBuilder();
 
@@ -110,15 +144,24 @@ public class CopyFileTool extends DefaultApplicationPlugin {
                 try {
                     File uploadedFile = FileUtil.getFile(filename, sourceTableName, sourceFileRecordId);
                     if (uploadedFile != null && uploadedFile.exists()) {
+
                         String tableName = appService.getFormTableName(appDef, formDefId);
-                        FileUtil.storeFile(uploadedFile, tableName, outputFileRecordId);
+
+                        File tempCopy = File.createTempFile("copy_", "_" + uploadedFile.getName());
+                        java.nio.file.Files.copy(
+                                uploadedFile.toPath(),
+                                tempCopy.toPath(),
+                                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                        );
+                        FileUtil.storeFile(tempCopy, tableName, outputFileRecordId);
 
                         if (savedFilenames.length() > 0) {
                             savedFilenames.append(";");
                         }
                         savedFilenames.append(filename);
 
-                    } 
+                    }
+
                 } catch (IOException e) {
                     LogUtil.error("CopyFileTool", e, "Failed to copy uploaded file: " + filename);
                 }
@@ -128,10 +171,30 @@ public class CopyFileTool extends DefaultApplicationPlugin {
         if (savedFilenames.length() > 0) {
             try {
                 String tableName = appService.getFormTableName(appDef, formDefId);
+
+                FormRowSet existingRows = appService.loadFormData(
+                        appDef.getAppId(),
+                        String.valueOf(appDef.getVersion()),
+                        formDefId,
+                        outputFileRecordId
+                );
+
+                String existingFiles = "";
+                if (existingRows != null && !existingRows.isEmpty()) {
+                    existingFiles = existingRows.get(0).getProperty(fileFieldId);
+                }
+
+                String finalFilenames;
+                if (existingFiles != null && !existingFiles.isEmpty()) {
+                    finalFilenames = existingFiles + ";" + savedFilenames.toString();
+                } else {
+                    finalFilenames = savedFilenames.toString();
+                }
+
                 FormRowSet rowSet = new FormRowSet();
                 FormRow newRow = new FormRow();
                 newRow.setId(outputFileRecordId);
-                newRow.put(fileFieldId, savedFilenames.toString()); 
+                newRow.put(fileFieldId, finalFilenames);
                 newRow.put("id", outputFileRecordId);
                 rowSet.add(newRow);
 
@@ -150,18 +213,43 @@ public class CopyFileTool extends DefaultApplicationPlugin {
             if (uploadedFile != null && uploadedFile.exists()) {
                 String tableName = appService.getFormTableName(appDef, formDefId);
 
-                FileUtil.storeFile(uploadedFile, tableName, outputFileRecordId);
+                File tempCopy = File.createTempFile("copy_", "_" + uploadedFile.getName());
+                java.nio.file.Files.copy(
+                        uploadedFile.toPath(),
+                        tempCopy.toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                );
 
+                FileUtil.storeFile(tempCopy, tableName, outputFileRecordId);
                 FormRowSet rowSet = new FormRowSet();
                 FormRow newRow = new FormRow();
                 newRow.setId(outputFileRecordId);
-                newRow.put(fileFieldId, filename.trim());
+                FormRowSet existingRows = appService.loadFormData(
+                        appDef.getAppId(),
+                        String.valueOf(appDef.getVersion()),
+                        formDefId,
+                        outputFileRecordId
+                );
+
+                String existingFiles = "";
+                if (existingRows != null && !existingRows.isEmpty()) {
+                    existingFiles = existingRows.get(0).getProperty(fileFieldId);
+                }
+
+                String newFiles;
+                if (existingFiles != null && !existingFiles.isEmpty()) {
+                    newFiles = existingFiles + ";" + filename.trim();
+                } else {
+                    newFiles = filename.trim();
+                }
+
+                newRow.put(fileFieldId, newFiles);
                 newRow.put("id", outputFileRecordId);
                 rowSet.add(newRow);
 
                 appService.storeFormData(formDefId, tableName, rowSet, outputFileRecordId);
 
-            } 
+            }
         } catch (IOException e) {
             LogUtil.error("CopyFileTool", e, "Failed to copy single file: " + filename);
         }
