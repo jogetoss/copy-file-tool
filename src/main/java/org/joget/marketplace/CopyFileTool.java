@@ -86,12 +86,13 @@ public class CopyFileTool extends DefaultApplicationPlugin {
                 String fileName = sourceFile.getName();
                 String tableName = appService.getFormTableName(appDef, formDefId);
 
-                File tempCopy = File.createTempFile("copy_", "_" + fileName);
-                java.nio.file.Files.copy(
-                        sourceFile.toPath(),
-                        tempCopy.toPath(),
-                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
-                );
+                File tempCopy = new File(System.getProperty("java.io.tmpdir"), fileName);
+
+java.nio.file.Files.copy(
+        sourceFile.toPath(),
+        tempCopy.toPath(),
+        java.nio.file.StandardCopyOption.REPLACE_EXISTING
+);
                 FileUtil.storeFile(tempCopy, tableName, outputFileRecordId);
 
                 FormRowSet existingRows = appService.loadFormData(
@@ -147,12 +148,12 @@ public class CopyFileTool extends DefaultApplicationPlugin {
 
                         String tableName = appService.getFormTableName(appDef, formDefId);
 
-                        File tempCopy = File.createTempFile("copy_", "_" + uploadedFile.getName());
-                        java.nio.file.Files.copy(
-                                uploadedFile.toPath(),
-                                tempCopy.toPath(),
-                                java.nio.file.StandardCopyOption.REPLACE_EXISTING
-                        );
+                        File tempCopy = new File(System.getProperty("java.io.tmpdir"), uploadedFile.getName());
+java.nio.file.Files.copy(
+    uploadedFile.toPath(),
+    tempCopy.toPath(),
+    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+);
                         FileUtil.storeFile(tempCopy, tableName, outputFileRecordId);
 
                         if (savedFilenames.length() > 0) {
@@ -213,12 +214,12 @@ public class CopyFileTool extends DefaultApplicationPlugin {
             if (uploadedFile != null && uploadedFile.exists()) {
                 String tableName = appService.getFormTableName(appDef, formDefId);
 
-                File tempCopy = File.createTempFile("copy_", "_" + uploadedFile.getName());
-                java.nio.file.Files.copy(
-                        uploadedFile.toPath(),
-                        tempCopy.toPath(),
-                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
-                );
+               File tempCopy = new File(System.getProperty("java.io.tmpdir"), uploadedFile.getName());
+java.nio.file.Files.copy(
+    uploadedFile.toPath(),
+    tempCopy.toPath(),
+    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+);
 
                 FileUtil.storeFile(tempCopy, tableName, outputFileRecordId);
                 FormRowSet rowSet = new FormRowSet();
